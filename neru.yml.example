@@ -1,0 +1,17 @@
+project:
+    name: vcr-simple-queue-demo
+instance:
+    name: dev
+    runtime: nodejs16
+    region: aws.euw1
+    application-id: your-vonage-application-id-goes-here
+    entrypoint: ["npm", "start"]
+    capabilities:
+        - messaging
+    configurations:
+        defaultSenderId: "Vonage"
+        defaultMsgPerSecond: 30
+        defaultMaxInflight: 30
+debug:
+    name: "debug"
+    entrypoint: ["npm", "start"]
