@@ -17,3 +17,71 @@
 # Deploy it
 
 - Run `neru deploy`
+
+
+# Example API requests
+
+## POST /queues/create
+
+Usage: Create a new queue into which you can add items to be processed.
+
+Payload:
+
+```
+{
+    "name": "testqueue01",
+    "maxInflight": 1, 
+    "msgPerSecond": 1
+}
+```
+
+Response:
+
+```
+{
+    "success": true,
+    "queue": "testqueue01"
+}
+```
+
+## POST /queues/additem/:queue_name
+
+Usage: Add a request to be processed to a queue that you created. This demo usese Messages API requests.
+
+Payload:
+
+```
+{
+    "from": {
+        "number": "Toni",
+        "type": "sms"
+    },
+    "to": {
+        "number": "4915112345678",
+        "type": "sms"
+    },
+    "text": "This is a test SMS."
+}
+```
+
+Response:
+
+```
+{
+    "success": true
+}
+```
+
+## DELETE /queues/:queue_name
+
+Usage: delete a queue and all it's contents immediately.
+
+Payload: none
+
+Response:
+
+```
+{
+    "success": true
+}
+```
