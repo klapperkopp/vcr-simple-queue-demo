@@ -12,6 +12,8 @@ instance:
         defaultSenderId: "Vonage"
         defaultMsgPerSecond: 30
         defaultMaxInflight: 30
+    secrets:
+        - INTERNAL_API_SECRET
 debug:
     name: "debug"
     entrypoint: ["npm", "start"]

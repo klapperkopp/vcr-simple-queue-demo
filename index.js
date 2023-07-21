@@ -6,9 +6,11 @@ const app = express();
 
 const PORT = process.env.NERU_APP_PORT || 3000;
 
-const DEFAULT_MPS = process.env.defaultMsgPerSecond || 30;
-const DEFAULT_MAX_INFLIGHT = process.env.defaultMaxInflight || 30;
-const DEFAULT_SENDER_ID = process.env.defaultSenderId || "Vonage";
+const config = JSON.parse(process.env.NERU_CONFIGURATIONS);
+const DEFAULT_MPS = config.defaultMsgPerSecond || 30;
+const DEFAULT_MAX_INFLIGHT = config.defaultMaxInflight || 30;
+const DEFAULT_SENDER_ID = config.defaultSenderId || "Vonage";
+const INTERNAL_API_SECRET = process.env.NERU_SECRET_INTERNAL_API_SECRET;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -32,7 +34,14 @@ app.post("/queues/create", async (req, res) => {
         active: true,
       })
       .execute();
-    return res.status(201).json({ success: true, queue });
+    return res
+      .status(201)
+      .json({
+        success: true,
+        name,
+        maxInflight: maxInflight || DEFAULT_MAX_INFLIGHT,
+        msgPerSecond: msgPerSecond || DEFAULT_MPS,
+      });
   } catch (e) {
     return handleErrorResponse(e, res, "Creating a new queue.");
   }
@@ -46,7 +55,12 @@ app.post("/queues/additem/:name", async (req, res) => {
   try {
     const session = neru.createSession();
     const queueApi = new Queue(session);
-    await queueApi.enqueueSingle(name, { ...req.body }).execute();
+    await queueApi
+      .enqueueSingle(name, {
+        ...req.body,
+        internalApiSecret: INTERNAL_API_SECRET,
+      })
+      .execute();
     return res.status(200).json({ success: true });
   } catch (e) {
     return handleErrorResponse(e, res, "Adding queue item.");
@@ -70,10 +84,12 @@ app.delete("/queues/:name", async (req, res) => {
 // this will be internally called when a queue item is executed
 app.post("/queues/:name", async (req, res) => {
   const { name } = req.query;
-  const { from, to, text } = req.body;
+  const { from, to, text, internalApiSecret } = req.body;
 
   console.log("Webhook called by Queue with Name: ", name);
-  console.log("Data processed: ", req.body);
+
+  if (internalApiSecret !== INTERNAL_API_SECRET)
+    return res.status(401).json({ success: false, error: "Unauthorized." });
 
   if (!from || (!from.type && !from.number))
     from = { type: "sms", number: `${DEFAULT_SENDER_ID}` };
@@ -87,7 +103,10 @@ app.post("/queues/:name", async (req, res) => {
     !to.type ||
     !to.number
   )
-    return res.sendStatus(500);
+    return res.staus(500).json({
+      success: false,
+      error: "Missing sender or receiver information.",
+    });
 
   try {
     const session = neru.createSession();
