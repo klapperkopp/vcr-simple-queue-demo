@@ -1,6 +1,7 @@
 import express from "express";
 import { neru, Queue, Messages } from "neru-alpha";
 import { handleErrorResponse } from "./handleErrors.js";
+import { handleAuth } from "./handleAuth.js";
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.get("/", (req, res) => {
 });
 
 // api to create a queue
-app.post("/queues/create", async (req, res) => {
+app.post("/queues/create", handleAuth, async (req, res) => {
   const { name, maxInflight, msgPerSecond } = req.body;
 
   // check if queue name was provided
@@ -54,7 +55,7 @@ app.post("/queues/create", async (req, res) => {
 
 // api to add an item to a queue
 // call this instead of messages api with the same payload but without required headers
-app.post("/queues/additem/:name", async (req, res) => {
+app.post("/queues/additem/:name", handleAuth, async (req, res) => {
   const { name } = req.params;
 
   // check if queue name was provided
@@ -80,9 +81,12 @@ app.post("/queues/additem/:name", async (req, res) => {
 });
 
 // api to delete a queue
-app.delete("/queues/:name", async (req, res) => {
+app.delete("/queues/:name", handleAuth, async (req, res) => {
   const { name } = req.params;
+
+  // check if queue name was provided
   if (!name) return res.sendStatus(500);
+
   try {
     const session = neru.createSession();
     const queueApi = new Queue(session);
