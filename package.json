@@ -5,6 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "prep-debug": "source .env.local",
+    "start-dev": "nodemon --inspect index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,5 +16,8 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "neru-alpha": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

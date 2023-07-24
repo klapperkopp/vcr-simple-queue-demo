@@ -6,11 +6,10 @@ const app = express();
 
 const PORT = process.env.NERU_APP_PORT || 3000;
 
-const config = JSON.parse(process.env.NERU_CONFIGURATIONS);
-const DEFAULT_MPS = config.defaultMsgPerSecond || 30;
-const DEFAULT_MAX_INFLIGHT = config.defaultMaxInflight || 30;
-const DEFAULT_SENDER_ID = config.defaultSenderId || "Vonage";
-const INTERNAL_API_SECRET = process.env.NERU_SECRET_INTERNAL_API_SECRET;
+const DEFAULT_MPS = process.env.defaultMsgPerSecond || 30;
+const DEFAULT_MAX_INFLIGHT = process.env.defaultMaxInflight || 30;
+const DEFAULT_SENDER_ID = process.env.defaultSenderId || "Vonage";
+const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

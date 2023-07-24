@@ -8,12 +8,15 @@ instance:
     entrypoint: ["npm", "start"]
     capabilities:
         - messaging
-    configurations:
-        defaultSenderId: "Vonage"
-        defaultMsgPerSecond: 30
-        defaultMaxInflight: 30
-    secrets:
-        - INTERNAL_API_SECRET
+    environment:
+        -   name: defaultSenderId
+            value: "Vonage"
+        -   name: defaultMsgPerSecond
+            value: 30
+        -   name: defaultMaxInflight
+            value: 30
+        -   name: INTERNAL_API_SECRET
+            secret: INTERNAL_API_SECRET
 debug:
     name: "debug"
-    entrypoint: ["npm", "start"]
+    entrypoint: ["npm", "run", "start-dev"]
