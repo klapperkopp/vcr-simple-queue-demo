@@ -103,7 +103,7 @@ app.delete("/queues/:name", handleAuth, async (req, res) => {
 
 // this will be internally called when a queue item is executed
 app.post("/queues/:name", async (req, res) => {
-  const { name } = req.query;
+  const { name } = req.params;
 
   const { originalBody, internalApiSecret } = req.body;
   const { from } = originalBody;
