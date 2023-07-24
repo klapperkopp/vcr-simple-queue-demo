@@ -7,7 +7,7 @@
 1. Run `neru app create --name "vcr-simple-queue-demo"` and copy application id (only if you don't have an app yet)
 2. Run `cp neru.yml.example neru.yml` and copy application id and any missing env variables into neru.yml
 3. Run `neru app configure --app-id [YOUR_APP_ID]` (this is only needed if you want to process inbound requests)
-4. Run `neru secrets add --name INTERNAL_API_SECRET --value "A SECRET HASH"` (this will be only internally used at the moment, should be a secure random hash or equal)
+4. Run `neru secrets add --name INTERNAL_API_SECRET --value "$(openssl rand -hex 12)"` (this will be only internally used at the moment, should be a secure random hash or equal)
 
 
 # Debug it

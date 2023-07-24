@@ -21,18 +21,24 @@ app.get("/", (req, res) => {
 // api to create a queue
 app.post("/queues/create", async (req, res) => {
   const { name, maxInflight, msgPerSecond } = req.body;
-  if (!name) return res.sendStatus(500);
-  // create queue
+
+  // check if queue name was provided
+  if (!name) return res.status(500).send("No name found.");
+
   try {
     const session = neru.createSession();
     const queueApi = new Queue(session);
-    const queue = await queueApi
+
+    // create a new queue item with neru queue provider
+    await queueApi
       .createQueue(name, `/queues/${name}`, {
         maxInflight: maxInflight || DEFAULT_MAX_INFLIGHT,
         msgPerSecond: msgPerSecond || DEFAULT_MPS,
         active: true,
       })
       .execute();
+
+    // send http response
     return res
       .status(201)
       .json({
@@ -50,16 +56,23 @@ app.post("/queues/create", async (req, res) => {
 // call this instead of messages api with the same payload but without required headers
 app.post("/queues/additem/:name", async (req, res) => {
   const { name } = req.params;
+
+  // check if queue name was provided
   if (!name) return res.status(500).send("No name found.");
+
   try {
     const session = neru.createSession();
     const queueApi = new Queue(session);
+
+    // create a new queue item with neru queue provider
     await queueApi
       .enqueueSingle(name, {
-        ...req.body,
+        originalBody: req.body,
         internalApiSecret: INTERNAL_API_SECRET,
       })
       .execute();
+
+    // send http response
     return res.status(200).json({ success: true });
   } catch (e) {
     return handleErrorResponse(e, res, "Adding queue item.");
@@ -73,7 +86,11 @@ app.delete("/queues/:name", async (req, res) => {
   try {
     const session = neru.createSession();
     const queueApi = new Queue(session);
+
+    // delete queue
     await queueApi.deleteQueue(name).execute();
+
+    // send http response
     return res.status(200).json({ success: true });
   } catch (e) {
     return handleErrorResponse(e, res, "Nothing to delete.");
@@ -83,35 +100,28 @@ app.delete("/queues/:name", async (req, res) => {
 // this will be internally called when a queue item is executed
 app.post("/queues/:name", async (req, res) => {
   const { name } = req.query;
-  const { from, to, text, internalApiSecret } = req.body;
+
+  const { originalBody, internalApiSecret } = req.body;
+  const { from } = originalBody;
 
   console.log("Webhook called by Queue with Name: ", name);
 
+  // internal authentication, so no one can call the internal endpoint from outside world
   if (internalApiSecret !== INTERNAL_API_SECRET)
     return res.status(401).json({ success: false, error: "Unauthorized." });
 
-  if (!from || (!from.type && !from.number))
-    from = { type: "sms", number: `${DEFAULT_SENDER_ID}` };
-
-  if (
-    !from ||
-    !to ||
-    !text ||
-    !from.type ||
-    !from.number ||
-    !to.type ||
-    !to.number
-  )
-    return res.staus(500).json({
-      success: false,
-      error: "Missing sender or receiver information.",
-    });
+  // replace sender with default sender ID if non provided
+  if (!from) from = `${DEFAULT_SENDER_ID}`
 
   try {
     const session = neru.createSession();
     const messaging = new Messages(session);
 
-    await messaging.sendText(from, to, text).execute();
+    // send original message through neru messages provider
+    await messaging.send(originalBody).execute();
+
+    // return response iternally
+    return res.sendStatus(200)
   } catch (e) {
     return handleErrorResponse(e, res, "Executing Queue Item");
   }
