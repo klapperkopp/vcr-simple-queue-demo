@@ -2,6 +2,7 @@ import express from "express";
 import { neru, Queue, Messages } from "neru-alpha";
 import { handleErrorResponse } from "./handleErrors.js";
 import { handleAuth } from "./handleAuth.js";
+import filterRouter from "./routers/filterRoutes.js";
 
 const app = express();
 
@@ -11,6 +12,10 @@ const DEFAULT_MPS = process.env.defaultMsgPerSecond || 30;
 const DEFAULT_MAX_INFLIGHT = process.env.defaultMaxInflight || 30;
 const DEFAULT_SENDER_ID = process.env.defaultSenderId || "Vonage";
 const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
+const ENABLE_WHITELIST_CHECK = process.env.ENABLE_WHITELIST_CHECK;
+const ENABLE_CONTENT_FILTER = process.env.ENABLE_CONTENT_FILTER;
+const ENABLE_GSM_CHECK = process.env.ENABLE_GSM_CHECK;
+const ENABLE_LENGTH_CHECK = process.env.ENABLE_LENGTH_CHECK;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -40,14 +45,12 @@ app.post("/queues/create", handleAuth, async (req, res) => {
       .execute();
 
     // send http response
-    return res
-      .status(201)
-      .json({
-        success: true,
-        name,
-        maxInflight: maxInflight || DEFAULT_MAX_INFLIGHT,
-        msgPerSecond: msgPerSecond || DEFAULT_MPS,
-      });
+    return res.status(201).json({
+      success: true,
+      name,
+      maxInflight: maxInflight || DEFAULT_MAX_INFLIGHT,
+      msgPerSecond: msgPerSecond || DEFAULT_MPS,
+    });
   } catch (e) {
     return handleErrorResponse(e, res, "Creating a new queue.");
   }
@@ -115,7 +118,7 @@ app.post("/queues/:name", async (req, res) => {
     return res.status(401).json({ success: false, error: "Unauthorized." });
 
   // replace sender with default sender ID if non provided
-  if (!from) from = `${DEFAULT_SENDER_ID}`
+  if (!from) from = `${DEFAULT_SENDER_ID}`;
 
   try {
     const session = neru.createSession();
@@ -125,11 +128,13 @@ app.post("/queues/:name", async (req, res) => {
     await messaging.send(originalBody).execute();
 
     // return response iternally
-    return res.sendStatus(200)
+    return res.sendStatus(200);
   } catch (e) {
     return handleErrorResponse(e, res, "Executing Queue Item");
   }
 });
+
+app.use(filterRouter);
 
 app.listen(PORT, () => {
   console.log(

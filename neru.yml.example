@@ -17,6 +17,14 @@ instance:
             value: 30
         -   name: INTERNAL_API_SECRET
             secret: INTERNAL_API_SECRET
+        -   name: ENABLE_WHITELIST_CHECK
+            value: true
+        -   name: ENABLE_CONTENT_FILTER
+            value: true
+        -   name: ENABLE_GSM_CHECK
+            value: true
+        -   name: ENABLE_LENGTH_CHECK
+            value: true
 debug:
     name: "debug"
     entrypoint: ["npm", "run", "start-dev"]
