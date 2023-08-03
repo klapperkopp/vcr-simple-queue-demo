@@ -32,6 +32,17 @@ app.get("/", (req, res) => {
   res.send("App is running.");
 });
 
+app.get("/_/health", (req, res) => {
+  res.send("OK");
+});
+
+app.use("/_/metrics", (req, res) => {
+  console.log("New metrics request: ", JSON.stringify(req.body));
+  console.log("params: ", req.params);
+  console.log("query: ", req.query);
+  res.send("OK");
+});
+
 // api to create a queue
 app.post("/queues/create", handleAuth, async (req, res) => {
   const { name, maxInflight, msgPerSecond } = req.body;
