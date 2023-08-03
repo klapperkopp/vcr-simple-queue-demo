@@ -12,10 +12,6 @@ const DEFAULT_MPS = process.env.defaultMsgPerSecond || 30;
 const DEFAULT_MAX_INFLIGHT = process.env.defaultMaxInflight || 30;
 const DEFAULT_SENDER_ID = process.env.defaultSenderId || "Vonage";
 const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
-const ENABLE_WHITELIST_CHECK = process.env.ENABLE_WHITELIST_CHECK;
-const ENABLE_CONTENT_FILTER = process.env.ENABLE_CONTENT_FILTER;
-const ENABLE_GSM_CHECK = process.env.ENABLE_GSM_CHECK;
-const ENABLE_LENGTH_CHECK = process.env.ENABLE_LENGTH_CHECK;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

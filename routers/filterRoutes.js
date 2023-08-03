@@ -3,6 +3,11 @@ import { neru } from "neru-alpha";
 import { handleAuth } from "../handleAuth";
 import { DB_TABLENAME_WHITELIST } from "../handleFilters";
 
+const ENABLE_WHITELIST_CHECK = process.env.ENABLE_WHITELIST_CHECK;
+const ENABLE_CONTENT_FILTER = process.env.ENABLE_CONTENT_FILTER;
+const ENABLE_GSM_CHECK = process.env.ENABLE_GSM_CHECK;
+const ENABLE_LENGTH_CHECK = process.env.ENABLE_LENGTH_CHECK;
+
 const filterRouter = express.Router();
 
 if (ENABLE_WHITELIST_CHECK) {
