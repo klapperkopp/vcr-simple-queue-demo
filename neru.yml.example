@@ -25,6 +25,8 @@ instance:
             value: true
         -   name: ENABLE_LENGTH_CHECK
             value: true
+        -   name: DB_TABLENAME_WHITELIST
+            value: DB_WHITELIST
 debug:
     name: "debug"
     entrypoint: ["npm", "run", "start-dev"]

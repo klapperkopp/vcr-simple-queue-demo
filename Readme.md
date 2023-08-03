@@ -9,6 +9,13 @@
 3. Run `neru app configure --app-id [YOUR_APP_ID]` (this is only needed if you want to process inbound requests)
 4. Run `neru secrets add --name INTERNAL_API_SECRET --value "$(openssl rand -hex 12)"` (this will be only internally used at the moment, should be a secure random hash or equal)
 
+# Optional Addons
+
+You can install optional addons by setting certain envrionment variables in neru.yml to true. Please see the respective plugin readme files to find out more. Some plugins might come with additional API endpoints that are described in their readme files.
+
+## Current Plugin List
+- [Filters](./Filters.md)
+
 
 # Debug it
 

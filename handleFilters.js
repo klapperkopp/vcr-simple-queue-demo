@@ -1,11 +1,17 @@
 import { neru } from "neru-alpha";
 
-export const DB_TABLENAME_WHITELIST = "DB_WHITELIST";
-const FORBIDDEN_WORDS = ["undefined", "null", "{", "}", "{||}", "|"];
+export const DB_TABLENAME_WHITELIST =
+  process.env.DB_TABLENAME_WHITELIST || "DB_TABLENAME_WHITELIST";
+const FORBIDDEN_WORDS =
+  process.env.FORBIDDEN_WORDS.split(
+    process.env.FORBIDDEN_WORDS_DELIMITIER || ","
+  ) || [];
 const GSM_REGEX =
+  process.env.GSM_REGEX ||
   "^[A-Za-z0-9 \\r\\n@£$¥èéùìòÇØøÅå\u0394_\u03A6\u0393\u039B\u03A9\u03A0\u03A8\u03A3\u0398\u039EÆæßÉ!\"#$%&'()*+,\\-./:;<=>?¡ÄÖÑÜ§¿äöñüà^{}\\\\\\[~\\]|\u20AC]*$";
-const GSM_EXTENDED_REGEX = /\€|\^|\{|\}|\[|\]|\~|\|/g;
-const ALLOWED_LENGTH = 160;
+const GSM_EXTENDED_REGEX =
+  process.env.GSM_EXTENDED_REGEX || /\€|\^|\{|\}|\[|\]|\~|\|/g;
+const ALLOWED_SMS_LENGTH = process.env.ALLOWED_SMS_LENGTH || 160;
 
 // this checks if a phone number is part of the whitelist table
 export const isWhitelisted = async (phone) => {
@@ -50,7 +56,7 @@ export const isPassingLengthCheck = (messageBody) => {
     .length;
   let totalLength = msgLength + specialCharDoubleLength;
   console.log("total length: ", totalLength);
-  if (totalLength <= ALLOWED_LENGTH) {
+  if (totalLength <= ALLOWED_SMS_LENGTH) {
     return true;
   } else {
     return false;
