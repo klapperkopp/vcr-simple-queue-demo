@@ -3,6 +3,12 @@ import { neru, Queue, Messages } from "neru-alpha";
 import { handleErrorResponse } from "./handleErrors.js";
 import { handleAuth } from "./handleAuth.js";
 import filterRouter from "./routers/filterRoutes.js";
+import {
+  isWhitelisted,
+  isPassingContentFilter,
+  isGSMAlphabet,
+  isPassingLengthCheck,
+} from "./handleFilters.js";
 
 const app = express();
 
@@ -12,6 +18,12 @@ const DEFAULT_MPS = process.env.defaultMsgPerSecond || 30;
 const DEFAULT_MAX_INFLIGHT = process.env.defaultMaxInflight || 30;
 const DEFAULT_SENDER_ID = process.env.defaultSenderId || "Vonage";
 const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
+
+const ENABLE_WHITELIST_CHECK = process.env.ENABLE_WHITELIST_CHECK;
+const ENABLE_CONTENT_FILTER = process.env.ENABLE_CONTENT_FILTER;
+const ENABLE_GSM_CHECK = process.env.ENABLE_GSM_CHECK;
+const ENABLE_LENGTH_CHECK = process.env.ENABLE_LENGTH_CHECK;
+const ALLOWED_SMS_LENGTH = process.env.ALLOWED_SMS_LENGTH || 160;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -56,9 +68,50 @@ app.post("/queues/create", handleAuth, async (req, res) => {
 // call this instead of messages api with the same payload but without required headers
 app.post("/queues/additem/:name", handleAuth, async (req, res) => {
   const { name } = req.params;
+  const { to: receiverNumber, text: messageText } = req.body;
 
   // check if queue name was provided
   if (!name) return res.status(500).send("No name found.");
+
+  let isWhitelisted = false;
+  if (ENABLE_WHITELIST_CHECK === true && receiverNumber) {
+    isWhitelisted = isWhitelisted(receiverNumber);
+  }
+
+  if (isWhitelisted !== true) {
+    if (ENABLE_GSM_CHECK == true) {
+      const isGSMAlphabet = isGSMAlphabet(messageText);
+      if (isGSMAlphabet !== true)
+        return res.json({
+          success: false,
+          error:
+            "Message contains non-GSM7 characters. Please check message text.",
+        });
+    }
+
+    if (ENABLE_LENGTH_CHECK == true) {
+      const isPassingContentFilter = isPassingContentFilter(messageText);
+      if (isPassingContentFilter !== true)
+        return res.json({
+          success: false,
+          error:
+            "Message contains not allowed words. Please check message text.",
+        });
+    }
+
+    if (ENABLE_LENGTH_CHECK == true) {
+      const isPassingLengthCheck = isPassingLengthCheck(messageText);
+      if (isPassingLengthCheck !== true)
+        return res.json({
+          success: false,
+          error: `Message is too long. Please check message length. (max. ${ALLOWED_SMS_LENGTH})`,
+        });
+    }
+  } else {
+    console.log(
+      "Message is going to a whitelisted number, any filters are deactivated."
+    );
+  }
 
   try {
     const session = neru.createSession();
