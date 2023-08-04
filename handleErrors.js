@@ -1,4 +1,4 @@
-export function handleErrorResponse(e, res, errorHint) {
+export function handleErrorResponse(e, res, errorHint, status = 500) {
   let message = `Error occured${
     errorHint ? " (" + errorHint + ")" : ""
   }. (${e}) / Details: ${e?.response?.data?.error}`;
