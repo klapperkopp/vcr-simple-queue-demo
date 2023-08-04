@@ -27,6 +27,16 @@ instance:
             value: true
         -   name: DB_TABLENAME_WHITELIST
             value: DB_WHITELIST
+        -   name: FORBIDDEN_WORDS
+            value: "undefined,null,{,},{||},|"
+        -   name: FORBIDDEN_WORDS_DELIMITER
+            value: ","
+        -   name: GSM_REGEX
+            value: "^[A-Za-z0-9 \\r\\n@£$¥èéùìòÇØøÅå\u0394_\u03A6\u0393\u039B\u03A9\u03A0\u03A8\u03A3\u0398\u039EÆæßÉ!\"#$%&'()*+,\\-./:;<=>?¡ÄÖÑÜ§¿äöñüà^{}\\\\\\[~\\]|\u20AC]*$"
+        -   name: GSM_EXTENDED_REGEX
+            value: /\€|\^|\{|\}|\[|\]|\~|\|/g
+        -   name: ALLOWED_SMS_LENGTH
+            value: 160
 debug:
     name: "debug"
     entrypoint: ["npm", "run", "start-dev"]
