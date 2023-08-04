@@ -3,7 +3,10 @@ import axios from "axios";
 import { validateApiKeyAndSecret } from "./utils.js";
 
 export async function handleAuth(req, res, next) {
-  if (req.headers["authorization"].toLowerCase().startsWith("bearer")) {
+  if (
+    req.headers["authorization"] &&
+    req.headers["authorization"].toLowerCase().startsWith("bearer")
+  ) {
     // for a simple way of authenticating, we are checking the application ID of this
     // deployed neru application and are checking if that app exists in the account
     // that is used for authentication. This means only the api key that deployed this
@@ -21,7 +24,10 @@ export async function handleAuth(req, res, next) {
       console.log("axios response: ", e?.response?.data);
       return handleErrorResponse(e, res, "Unauthorized", 401);
     }
-  } else if (req.headers["authorization"].toLowerCase().startsWith("basic")) {
+  } else if (
+    req.headers["authorization"] &&
+    req.headers["authorization"].toLowerCase().startsWith("basic")
+  ) {
     // this is an alternative check for basic auth, based on .neru-cli api key and secret in the neru instance
     try {
       const base64Credentials = req.headers["authorization"].split(" ")[1];
