@@ -100,7 +100,7 @@ app.post("/queues/additem/:name", handleAuth, async (req, res) => {
         });
     }
 
-    if (ENABLE_LENGTH_CHECK == true) {
+    if (ENABLE_CONTENT_FILTER == true) {
       const isPassingContentFilter = isPassingContentFilter(messageText);
       if (isPassingContentFilter !== true)
         return res.json({
